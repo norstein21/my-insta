@@ -11,6 +11,7 @@ import 'package:my_instagram/responsive/mobile_screen_layout.dart';
 import 'package:my_instagram/responsive/responsive_layout_builder.dart';
 import 'package:my_instagram/responsive/web_screen_layout.dart';
 import 'package:my_instagram/utils/colors.dart';
+import 'package:my_instagram/widget/dismiss_keyboard.dart';
 
 import 'app/routes/app_pages.dart';
 
@@ -36,63 +37,64 @@ class MyIg extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GetMaterialApp(
-        title: "MyInstagram",
-        getPages: AppPages.routes,
-        initialBinding: BindingsBuilder(() {
-          Get.put<AuthController>(AuthController());
-        }),
-        debugShowCheckedModeBanner: false,
-        home: GetBuilder<AuthController>(builder: (controller) {
-          if (controller.isLoading.value) {
-            return const Scaffold(
-              body: Center(
-                child: CircularProgressIndicator(
-                  color: Colors.black,
-                ),
-              ),
-            );
-          }
-          if (controller.getUser == null) {
-            return const Scaffold(
-              body: CircularProgressIndicator(
-                color: Colors.black,
-              ),
-            );
-          } else {
-            return StreamBuilder(
-                stream: FirebaseAuth.instance.authStateChanges(),
-                builder: (context, snapshot) {
-                  if (snapshot.connectionState == ConnectionState.active) {
-                    if (snapshot.hasData) {
-                      return const ResponsiveLayout(
-                          webScreenLayout: WebScreenLayout(),
-                          mobileScreenLayout: MobileScreenLayout());
-                    } else if (snapshot.hasError) {
-                      return Scaffold(
-                        body: Center(
-                          child: Text("error : ${snapshot.error}"),
-                        ),
-                      );
-                    }
-                  }
-                  if (snapshot.connectionState == ConnectionState.waiting) {
-                    return const Center(child: CircularProgressIndicator());
-                  } else {
-                    LoginBinding().dependencies();
-                    return const LoginView();
-                  }
-                });
-          }
-        }),
-        theme: ThemeData.dark().copyWith(
-          scaffoldBackgroundColor: mobileBackgroundColor,
-          pageTransitionsTheme: const PageTransitionsTheme(builders: {
-            TargetPlatform.iOS: FadeUpwardsPageTransitionsBuilder(),
-            TargetPlatform.android: FadeUpwardsPageTransitionsBuilder(),
-            TargetPlatform.macOS: FadeUpwardsPageTransitionsBuilder(),
-            TargetPlatform.windows: FadeUpwardsPageTransitionsBuilder(),
+    return DismissKeyboard(
+      child: GetMaterialApp(
+          title: "MyInstagram",
+          getPages: AppPages.routes,
+          initialBinding: BindingsBuilder(() {
+            Get.put<AuthController>(AuthController());
           }),
-        ));
+          debugShowCheckedModeBanner: false,
+          home: GetBuilder<AuthController>(builder: (controller) {
+            if (controller.status.isLoading) {
+              return const Scaffold(
+                body: Center(
+                  child: CircularProgressIndicator(
+                    color: Colors.white,
+                  ),
+                ),
+              );
+            }
+
+            // User tidak ditemukan / gagal auth
+            if (controller.getUser == null) {
+              LoginBinding().dependencies();
+              return const LoginView();
+            } else {
+              return StreamBuilder(
+                  stream: FirebaseAuth.instance.authStateChanges(),
+                  builder: (context, snapshot) {
+                    if (snapshot.connectionState == ConnectionState.active) {
+                      if (snapshot.hasData) {
+                        return const ResponsiveLayout(
+                            webScreenLayout: WebScreenLayout(),
+                            mobileScreenLayout: MobileScreenLayout());
+                      } else if (snapshot.hasError) {
+                        return Scaffold(
+                          body: Center(
+                            child: Text("error : ${snapshot.error}"),
+                          ),
+                        );
+                      }
+                    }
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return const Center(child: CircularProgressIndicator());
+                    } else {
+                      LoginBinding().dependencies();
+                      return const LoginView();
+                    }
+                  });
+            }
+          }),
+          theme: ThemeData.dark().copyWith(
+            scaffoldBackgroundColor: mobileBackgroundColor,
+            pageTransitionsTheme: const PageTransitionsTheme(builders: {
+              TargetPlatform.iOS: FadeUpwardsPageTransitionsBuilder(),
+              TargetPlatform.android: FadeUpwardsPageTransitionsBuilder(),
+              TargetPlatform.macOS: FadeUpwardsPageTransitionsBuilder(),
+              TargetPlatform.windows: FadeUpwardsPageTransitionsBuilder(),
+            }),
+          )),
+    );
   }
 }

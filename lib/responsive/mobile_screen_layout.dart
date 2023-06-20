@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:my_instagram/app/modules/add_post/views/add_post_view.dart';
 import 'package:my_instagram/utils/colors.dart';
 import 'package:my_instagram/utils/global_varible.dart';
 
@@ -16,26 +17,31 @@ class MobileScreenLayout extends StatefulWidget {
 
 class _MobileScreenLayoutState extends State<MobileScreenLayout> {
   int _navbarIndex = 0;
-  late PageController pageController;
+  late PageController _pageController;
 
   @override
   void initState() {
     super.initState();
-    pageController = PageController(initialPage: _navbarIndex);
+    _pageController = PageController(initialPage: _navbarIndex);
+    _pageController.addListener(() {
+      setState(() {
+        _navbarIndex = _pageController.page!.toInt();
+      });
+    });
   }
 
   void navigationTapped(int page) {
     setState(() {
       _navbarIndex = page;
     });
-    pageController.animateToPage(page,
+    _pageController.animateToPage(page,
         duration: const Duration(milliseconds: 300), curve: Curves.ease);
   }
 
   @override
   void dispose() {
     super.dispose();
-    pageController.dispose();
+    _pageController.dispose();
   }
 
   @override
@@ -44,12 +50,14 @@ class _MobileScreenLayoutState extends State<MobileScreenLayout> {
     return Scaffold(
         body: SafeArea(
             child: PageView(
-          controller: pageController,
+          controller: _pageController,
           physics: const NeverScrollableScrollPhysics(),
           children: [
             Center(child: Text(user!.username)),
             Center(child: Text(user.email)),
-            Center(child: Text(user.bio)),
+            AddPostView(
+              pageController: _pageController,
+            ),
             Center(child: Text(user.uid)),
             Center(child: Text(user.profileImage))
           ],

@@ -1,6 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
-import 'package:my_instagram/auth/auth_controller.dart';
 import 'package:my_instagram/utils/global_varible.dart';
 
 class ResponsiveLayout extends StatefulWidget {

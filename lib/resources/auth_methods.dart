@@ -12,13 +12,20 @@ class AuthMethods {
   ValueNotifier<bool> isSuccess = ValueNotifier<bool>(false);
 
   // get user detail
-  Future<model.User> getUserDetails() async {
-    User currentUser = _auth.currentUser!;
+  Future<model.User?> getUserDetails() async {
+    User? currentUser = _auth.currentUser;
+    if (currentUser == null) return null;
 
     DocumentSnapshot dataUser =
         await _firestore.collection('users').doc(currentUser.uid).get();
-    print(dataUser);
     return model.User.fromSnap(dataUser);
+
+    // User currentUser = _auth.currentUser!;
+
+    // DocumentSnapshot dataUser =
+    //     await _firestore.collection('users').doc(currentUser.uid).get();
+    // print(dataUser);
+    // return model.User.fromSnap(dataUser);
 
     // try {
     //   DocumentSnapshot dataUser =

@@ -1,9 +1,9 @@
 import 'package:my_instagram/models/user.dart' as model;
-import 'package:flutter/material.dart';
+
 import 'package:get/get.dart';
 import 'package:my_instagram/resources/auth_methods.dart';
 
-class AuthController extends GetxController {
+class AuthController extends GetxController with StateMixin {
   model.User? _user;
   final AuthMethods _authMethods = AuthMethods();
   RxBool isLoading = true.obs;
@@ -14,13 +14,21 @@ class AuthController extends GetxController {
   void onInit() async {
     super.onInit();
     await refreshUser();
-    print(getUser);
   }
 
-  Future<void> refreshUser() async {
-    model.User user = await _authMethods.getUserDetails();
+  Future<bool> refreshUser() async {
+    // Make status to loading
+    change(null, status: RxStatus.loading());
+    model.User? user = await _authMethods.getUserDetails();
     _user = user;
     isLoading(false);
+    if (user == null) {
+      change(null, status: RxStatus.success());
+      return false;
+    }
     update();
+    change(null, status: RxStatus.success());
+    return true;
+    // Done change status to success
   }
 }
